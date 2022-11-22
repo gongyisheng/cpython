@@ -103,7 +103,7 @@ encoder_encode_float(PyEncoderObject *s, PyObject *obj);
 #define S_CHAR(c) (c >= ' ' && c <= '~' && c != '\\' && c != '"')
 #define IS_WHITESPACE(c) (((c) == ' ') || ((c) == '\t') || ((c) == '\n') || ((c) == '\r'))
 
-// escape single character to unicode
+// escape special character from unicode to ascii
 static Py_ssize_t
 ascii_escape_unichar(Py_UCS4 c, unsigned char *output, Py_ssize_t chars)
 {
@@ -140,7 +140,7 @@ ascii_escape_unichar(Py_UCS4 c, unsigned char *output, Py_ssize_t chars)
     return chars;
 }
 
-// escape the whole string to unicode
+// escape the whole string from unicode to ascii
 static PyObject *
 ascii_escape_unicode(PyObject *pystr)
 {
@@ -194,11 +194,11 @@ ascii_escape_unicode(PyObject *pystr)
     for (i = 0; i < input_chars; i++) {
         Py_UCS4 c = PyUnicode_READ(kind, input, i);
         if (S_CHAR(c)) {
-            // if empty, set c directly to output
+            // if not special, set c directly to output
             output[chars++] = c;
         }
         else {
-            // if not empty, escape it to unicode
+            // if special, escape it using process func
             chars = ascii_escape_unichar(c, output, chars);
         }
     }
@@ -258,6 +258,7 @@ escape_unicode(PyObject *pystr)
 
     kind = PyUnicode_KIND(rval);
 
+// encode output from ascii to unicode
 #define ENCODE_OUTPUT do { \
         chars = 0; \
         output[chars++] = '"'; \
@@ -298,7 +299,7 @@ escape_unicode(PyObject *pystr)
         assert(kind == PyUnicode_4BYTE_KIND);
         ENCODE_OUTPUT;
     }
-#undef ENCODE_OUTPUT
+#undef ENCODE_OUTPUT // undefine macro
 
 #ifdef Py_DEBUG
     assert(_PyUnicode_CheckConsistency(rval, 1));
