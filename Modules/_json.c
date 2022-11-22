@@ -103,6 +103,7 @@ encoder_encode_float(PyEncoderObject *s, PyObject *obj);
 #define S_CHAR(c) (c >= ' ' && c <= '~' && c != '\\' && c != '"')
 #define IS_WHITESPACE(c) (((c) == ' ') || ((c) == '\t') || ((c) == '\n') || ((c) == '\r'))
 
+// escape single character to unicode
 static Py_ssize_t
 ascii_escape_unichar(Py_UCS4 c, unsigned char *output, Py_ssize_t chars)
 {
@@ -139,6 +140,7 @@ ascii_escape_unichar(Py_UCS4 c, unsigned char *output, Py_ssize_t chars)
     return chars;
 }
 
+// escape the whole string to unicode
 static PyObject *
 ascii_escape_unicode(PyObject *pystr)
 {
@@ -182,23 +184,25 @@ ascii_escape_unicode(PyObject *pystr)
         output_size += d;
     }
 
-    rval = PyUnicode_New(output_size, 127);
+    rval = PyUnicode_New(output_size, 127); // an object with size and maxchar
     if (rval == NULL) {
         return NULL;
     }
-    output = PyUnicode_1BYTE_DATA(rval);
+    output = PyUnicode_1BYTE_DATA(rval); // make a byte of empty output
     chars = 0;
-    output[chars++] = '"';
+    output[chars++] = '"'; // set first char to "
     for (i = 0; i < input_chars; i++) {
         Py_UCS4 c = PyUnicode_READ(kind, input, i);
         if (S_CHAR(c)) {
+            // if empty, set c directly to output
             output[chars++] = c;
         }
         else {
+            // if not empty, escape it to unicode
             chars = ascii_escape_unichar(c, output, chars);
         }
     }
-    output[chars++] = '"';
+    output[chars++] = '"'; // set last char to "
 #ifdef Py_DEBUG
     assert(_PyUnicode_CheckConsistency(rval, 1));
 #endif
