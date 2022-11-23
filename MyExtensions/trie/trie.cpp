@@ -10,42 +10,39 @@ typedef struct TrieNode {
     std::unordered_map<char, TrieNode*> children;
 } TrieNode;
 
-static void insert(TrieNode* root, const std::string* text) {
+static void insert(TrieNode* root, const std::string &text) {
     TrieNode* curr = root;
-    char c;
-    for (int i=0;i<(*text).size();i++){
-        c = (*text)[i];
-        if (curr->children.find(c) == curr->children.end()) {
-            curr->children[c] = (TrieNode *) malloc(sizeof(TrieNode));
+    for (int i=0;i<text.size();i++){
+        if (curr->children.find(text[i]) == curr->children.end()) {
+            curr->children[text[i]] = new TrieNode();
         }
-        curr = curr->children[c];
+        curr = curr->children[text[i]];
     }
     curr->isEnd = true;
 }
 
-static short int isPartOf(TrieNode* root, const std::string* text){
+
+static int isPartOf(TrieNode* root, const std::string &text){
     std::queue<TrieNode*> q;
-    char c;
-    for (int i=0;i<(*text).size();i++) {
+    for (int i=0;i<text.size();i++) {
         if(q.size()!=0){
             int size = q.size();
             for(int j=0;j<size;j++){
                 TrieNode* node = q.front();
-                c = (*text)[i];
                 q.pop();
-                if(node->children.find(c)!=node->children.end()){
-                    if(node->children[c]->isEnd){
-                        return true;
+                if(node->children.find(text[i])!=node->children.end()){
+                    if(node->children[text[i]]->isEnd){
+                        return 1;
                     }
-                    q.push(node->children[c]);
+                    q.push(node->children[text[i]]);
                 }
             }
         }
-        if(root->children.find(c)!=root->children.end()){
-            q.push(root->children[c]);
+        if(root->children.find(text[i])!=root->children.end()){
+            q.push(root->children[text[i]]);
         }
     }
-    return false;
+    return 0;
 }
 
 
@@ -65,7 +62,7 @@ static PyObject *PyTrie_FromTrieNode(TrieNode *node, int must_free) {
 
 /* Create Trie Tree */
 static PyObject *py_create(PyObject *self, PyObject *args) {
-    TrieNode *node = (TrieNode *) malloc(sizeof(TrieNode));
+    TrieNode *node = new TrieNode();
     node->isEnd = false;
     return PyTrie_FromTrieNode(node, 1);
 }
@@ -74,9 +71,9 @@ static PyObject *py_create(PyObject *self, PyObject *args) {
 static PyObject *py_insert(PyObject *self, PyObject *args) {
     TrieNode *root;
     PyObject *py_root;
-    const std::string *text;
+    const char *text;
     
-    if (!PyArg_ParseTuple(args, "OO", &py_root, &text)) {
+    if (!PyArg_ParseTuple(args, "Os", &py_root, &text)) {
         return NULL;
     }
     if (!(root = PyTrie_AsTrieNode(py_root))) {
@@ -90,16 +87,16 @@ static PyObject *py_insert(PyObject *self, PyObject *args) {
 static PyObject *py_isPartOf(PyObject *self, PyObject *args) {
     TrieNode *root;
     PyObject *py_root;
-    const std::string *text;
+    const char *text;
     
-    if (!PyArg_ParseTuple(args, "OO", &py_root, &text)) {
+    if (!PyArg_ParseTuple(args, "Os", &py_root, &text)) {
         return NULL;
     }
     if (!(root = PyTrie_AsTrieNode(py_root))) {
         return NULL;
     }
-    short int result = isPartOf(root, text);
-    Py_BuildValue("h", result);
+    int result = isPartOf(root, text);
+    return Py_BuildValue("i", result);
 }
 
 /* Module method table */
@@ -121,5 +118,6 @@ static struct PyModuleDef triemodule = {
 
 /* Module initialization function */
 PyMODINIT_FUNC PyInit_trie(void) {
+    Py_Initialize();
     return PyModule_Create(&triemodule);
 }
