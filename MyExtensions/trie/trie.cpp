@@ -13,10 +13,12 @@ typedef struct TrieNode {
 static void insert(TrieNode* root, const std::string &text) {
     TrieNode* curr = root;
     for (int i=0;i<text.size();i++){
-        if (curr->children.find(text[i]) == curr->children.end()) {
-            curr->children[text[i]] = new TrieNode();
+        char c = text[i];
+        std::unordered_map<char, TrieNode*>& curr_children = curr->children;
+        if (curr_children.find(c) == curr_children.end()) {
+            curr_children[c] = new TrieNode();
         }
-        curr = curr->children[text[i]];
+        curr = curr_children[c];
     }
     curr->isEnd = true;
 }
@@ -24,22 +26,25 @@ static void insert(TrieNode* root, const std::string &text) {
 
 static int isPartOf(TrieNode* root, const std::string &text){
     std::queue<TrieNode*> q;
+    std::unordered_map<char, TrieNode*>& root_children = root->children;
     for (int i=0;i<text.size();i++) {
+        char c = text[i];
         if(q.size()!=0){
             int size = q.size();
             for(int j=0;j<size;j++){
                 TrieNode* node = q.front();
+                std::unordered_map<char, TrieNode*>& node_children = node->children;
                 q.pop();
-                if(node->children.find(text[i])!=node->children.end()){
-                    if(node->children[text[i]]->isEnd){
+                if(node_children.find(c)!=node_children.end()){
+                    if(node_children[c]->isEnd){
                         return 1;
                     }
-                    q.push(node->children[text[i]]);
+                    q.push(node_children[c]);
                 }
             }
         }
-        if(root->children.find(text[i])!=root->children.end()){
-            q.push(root->children[text[i]]);
+        if(root_children.find(c)!=root_children.end()){
+            q.push(root_children[c]);
         }
     }
     return 0;
