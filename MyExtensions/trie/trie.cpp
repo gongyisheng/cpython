@@ -10,6 +10,7 @@ typedef struct TrieNode {
     std::unordered_map<char, TrieNode*> children;
 } TrieNode;
 
+// insert a word to trie tree
 static void insert(TrieNode* root, const std::string &text) {
     TrieNode* curr = root;
     for (int i=0;i<text.size();i++){
@@ -23,7 +24,7 @@ static void insert(TrieNode* root, const std::string &text) {
     curr->isEnd = true;
 }
 
-
+// find whether any substring in text is in trie tree
 static int isPartOf(TrieNode* root, const std::string &text){
     std::queue<TrieNode*> q;
     std::unordered_map<char, TrieNode*>& root_children = root->children;
