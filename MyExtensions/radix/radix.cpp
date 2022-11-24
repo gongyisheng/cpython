@@ -106,7 +106,7 @@ static int isPartOf(RadixNode* root, const std::string &text){
 
 // calc memory usage of radix tree
 static int getMemoryUsage(RadixNode* root) {
-    int size = sizeof(RadixNode);
+    int size = sizeof(root) + sizeof(root->word) + sizeof(root->isEnd) + sizeof(root->children);
     RadixNode **root_children = root->children;
     for(int i=0;i<128;i++) {
         if(root_children[i] != NULL) {
