@@ -1,7 +1,7 @@
 #include <Python.h>
 #include <string>
 #include <queue>
-
+#include <iostream>
 
 // Trie node struct
 typedef struct TrieNode {
@@ -48,6 +48,19 @@ static int isPartOf(TrieNode* root, const std::string &text){
         }
     }
     return 0;
+}
+
+// visualize
+static void visualize(TrieNode* node, int level=0, char c='/') {
+    for(int i=0;i<level*4;i++) {
+        std::cout << " ";
+    }
+    std::cout << "Node [character=" << c << ",isEnd=" << node->isEnd << "]\n";
+    for(int i=0;i<128;i++) {
+        if(node->children[i] != NULL) {
+            visualize(node->children[i], level+1, (char)i);
+        }
+    }
 }
 
 // calc memory usage of trie tree
@@ -132,12 +145,28 @@ static PyObject *py_getMemoryUsage(PyObject *self, PyObject *args) {
     return Py_BuildValue("i", memSize);
 }
 
+/* Visualize Radix Tree for Debug */
+static PyObject *py_visualize(PyObject *self, PyObject *args) {
+    TrieNode *root;
+    PyObject *py_root;
+    
+    if (!PyArg_ParseTuple(args, "O", &py_root)) {
+        return NULL;
+    }
+    if (!(root = PyTrie_AsTrieNode(py_root))) {
+        return NULL;
+    }
+    visualize(root, 0);
+    Py_RETURN_NONE;
+}
+
 /* Module method table */
 static PyMethodDef TrieMethods[] = {
     {"create", py_create, METH_VARARGS, "Create Trie Tree"},
     {"insert", py_insert, METH_VARARGS, "Insert word into Trie Tree"},
     {"isPartOf", py_isPartOf, METH_VARARGS, "Check if part of text exists in Trie Tree"},
     {"getMemoryUsage", py_getMemoryUsage, METH_VARARGS, "Get memory usage of Trie Tree"},
+    {"visualize", py_visualize, METH_VARARGS, "Visualize Trie Tree for debug"},
     {NULL, NULL, 0, NULL}
 };
 
