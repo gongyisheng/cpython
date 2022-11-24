@@ -50,6 +50,18 @@ static int isPartOf(TrieNode* root, const std::string &text){
     return 0;
 }
 
+// calc memory usage of trie tree
+static int getMemoryUsage(TrieNode* root) {
+    int size = sizeof(TrieNode);
+    TrieNode **root_children = root->children;
+    for(int i=0;i<128;i++) {
+        if(root_children[i] != NULL) {
+            size += getMemoryUsage(root_children[i]);
+        }
+    }
+    return size;
+}
+
 
 /* Destructor function for points */
 static void del_TrieNode(PyObject *obj) {
@@ -105,11 +117,27 @@ static PyObject *py_isPartOf(PyObject *self, PyObject *args) {
     return Py_BuildValue("i", result);
 }
 
+/* Get Memory Usage of Trie Tree */
+static PyObject *py_getMemoryUsage(PyObject *self, PyObject *args) {
+    TrieNode *root;
+    PyObject *py_root;
+    
+    if (!PyArg_ParseTuple(args, "O", &py_root)) {
+        return NULL;
+    }
+    if (!(root = PyTrie_AsTrieNode(py_root))) {
+        return NULL;
+    }
+    int memSize = getMemoryUsage(root);
+    return Py_BuildValue("i", memSize);
+}
+
 /* Module method table */
 static PyMethodDef TrieMethods[] = {
     {"create", py_create, METH_VARARGS, "Create Trie Tree"},
     {"insert", py_insert, METH_VARARGS, "Insert word into Trie Tree"},
     {"isPartOf", py_isPartOf, METH_VARARGS, "Check if part of text exists in Trie Tree"},
+    {"getMemoryUsage", py_getMemoryUsage, METH_VARARGS, "Get memory usage of Trie Tree"},
     {NULL, NULL, 0, NULL}
 };
 
