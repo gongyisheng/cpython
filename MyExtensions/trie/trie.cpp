@@ -7,16 +7,16 @@
 // Trie node struct
 typedef struct TrieNode {
     bool isEnd;
-    std::unordered_map<char, TrieNode*> children;
+    TrieNode *children[128];
 } TrieNode;
 
 // insert a word to trie tree
 static void insert(TrieNode* root, const std::string &text) {
     TrieNode* curr = root;
     for (int i=0;i<text.size();i++){
-        char c = text[i];
-        std::unordered_map<char, TrieNode*>& curr_children = curr->children;
-        if (curr_children.find(c) == curr_children.end()) {
+        int c = (int)text[i];
+        TrieNode **curr_children = curr->children;
+        if (curr_children[c] == NULL) {
             curr_children[c] = new TrieNode();
         }
         curr = curr_children[c];
@@ -27,16 +27,16 @@ static void insert(TrieNode* root, const std::string &text) {
 // find whether any substring in text is in trie tree
 static int isPartOf(TrieNode* root, const std::string &text){
     std::queue<TrieNode*> q;
-    std::unordered_map<char, TrieNode*>& root_children = root->children;
+    auto root_children = root->children;
     for (int i=0;i<text.size();i++) {
-        char c = text[i];
+        char c = (int)text[i];
         if(q.size()!=0){
             int size = q.size();
             for(int j=0;j<size;j++){
-                TrieNode* node = q.front();
-                std::unordered_map<char, TrieNode*>& node_children = node->children;
+                TrieNode *node = q.front();
+                TrieNode **node_children = node->children;
                 q.pop();
-                if(node_children.find(c)!=node_children.end()){
+                if(node_children[c] != NULL){
                     if(node_children[c]->isEnd){
                         return 1;
                     }
@@ -44,7 +44,7 @@ static int isPartOf(TrieNode* root, const std::string &text){
                 }
             }
         }
-        if(root_children.find(c)!=root_children.end()){
+        if(root_children[c] != NULL){
             q.push(root_children[c]);
         }
     }
@@ -70,6 +70,7 @@ static PyObject *PyTrie_FromTrieNode(TrieNode *node, int must_free) {
 static PyObject *py_create(PyObject *self, PyObject *args) {
     TrieNode *node = new TrieNode();
     node->isEnd = false;
+    memset(node->children, NULL, 128);
     return PyTrie_FromTrieNode(node, 1);
 }
 
