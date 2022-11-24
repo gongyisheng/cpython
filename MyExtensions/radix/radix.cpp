@@ -11,6 +11,15 @@ typedef struct RadixNode {
     RadixNode *children[128];
 } RadixNode;
 
+// swap children between two radix nodes
+static void swapChildren(RadixNode *a, RadixNode *b){
+    for(int i=0;i<128;i++){
+        RadixNode *tmp = a->children[i];
+        a->children[i] = b->children[i];
+        b->children[i] = tmp;
+    }
+}
+
 // insert a word to radix tree
 static void insert(RadixNode* root, const std::string &text) {
     RadixNode* curr = root;
@@ -43,11 +52,11 @@ static void insert(RadixNode* root, const std::string &text) {
         else { // if not reach the end of the existing word
             // create a new node to be appended to the existing node (left node)
             RadixNode *lnode = new RadixNode();
+            RadixNode *pnode = curr_children[c];
             lnode->word = curr_word.substr(j, curr_word.size()-j);
             lnode->isEnd = curr_children[c]->isEnd;
-            *lnode->children = *curr_children[c]->children;
+            swapChildren(lnode, pnode);
             // update the existing node (parent node)
-            RadixNode *pnode = curr_children[c];
             pnode->word = curr_word.substr(0, j);
             pnode->isEnd = false;
             pnode->children[(int)lnode->word[0]] = lnode;
