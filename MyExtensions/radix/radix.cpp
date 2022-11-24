@@ -1,6 +1,7 @@
 #include <Python.h>
 #include <string>
 #include <queue>
+#include <iostream>
 
 // Radix node is a kind of compressed Radix node
 // Radix node struct
@@ -27,38 +28,38 @@ static void insert(RadixNode* root, const std::string &text) {
         }
 
         // if the current node has a child with `c` as perfix
-        std::string existing_word = curr_children[c]->word;
+        std::string curr_word = curr_children[c]->word;
         // compare & see if the perfix of existing word and the new word are the same
         int j = 0;
-        while(j<existing_word.size() && i<text.size() && existing_word[j]==text[i]) {
+        while(j<curr_word.size() && i<text.size() && curr_word[j]==text[i]) {
             j++;
             i++;
         }
 
         // if reach the end of the existing word
-        if(j==existing_word.size()) {
+        if(j==curr_word.size()) {
             curr = curr_children[c];
         }
         else { // if not reach the end of the existing word
-            // create a new node to be appended to the existing node
-            RadixNode *new_node = new RadixNode();
-            new_node->word = existing_word.substr(j, existing_word.size()-j);
-            new_node->isEnd = curr_children[c]->isEnd;
-            *new_node->children = *curr_children[c]->children;
-            // update the existing node
-            RadixNode *existing_node = curr_children[c];
-            existing_node->word = existing_word.substr(0, j);
-            existing_node->isEnd = false;
-            existing_node->children[(int)new_node->word[0]] = new_node;
+            // create a new node to be appended to the existing node (left node)
+            RadixNode *lnode = new RadixNode();
+            lnode->word = curr_word.substr(j, curr_word.size()-j);
+            lnode->isEnd = curr_children[c]->isEnd;
+            *lnode->children = *curr_children[c]->children;
+            // update the existing node (parent node)
+            RadixNode *pnode = curr_children[c];
+            pnode->word = curr_word.substr(0, j);
+            pnode->isEnd = false;
+            pnode->children[(int)lnode->word[0]] = lnode;
             // if the new word is not longer than the existing word
             if(i==text.size()) {
                 curr_children[c]->isEnd = true;
             } 
-            else { // if the new word is longer than the existing word
-                RadixNode *new_node2 = new RadixNode();
-                new_node2->word = text.substr(i);
-                new_node2->isEnd = true;
-                curr_children[c]->children[(int)new_node2->word[0]] = new_node2;
+            else { // if the new word is longer than the existing word, create a new node (right node)
+                RadixNode *rnode = new RadixNode();
+                rnode->word = text.substr(i);
+                rnode->isEnd = true;
+                curr_children[c]->children[(int)rnode->word[0]] = rnode;
             }
             break;
         }
@@ -102,6 +103,19 @@ static int isPartOf(RadixNode* root, const std::string &text){
         }
     }
     return false;
+}
+
+// visualize
+static void visualize(RadixNode* node, int level=0) {
+    for(int i=0;i<level*4;i++) {
+        std::cout << " ";
+    }
+    std::cout << "Node [word=" << node->word << ",isEnd=" << node->isEnd << "]\n";
+    for(int i=0;i<128;i++) {
+        if(node->children[i] != NULL) {
+            visualize(node->children[i], level+1);
+        }
+    }
 }
 
 // calc memory usage of radix tree
@@ -185,12 +199,28 @@ static PyObject *py_getMemoryUsage(PyObject *self, PyObject *args) {
     return Py_BuildValue("i", memSize);
 }
 
+/* Visualize Radix Tree for Debug */
+static PyObject *py_visualize(PyObject *self, PyObject *args) {
+    RadixNode *root;
+    PyObject *py_root;
+    
+    if (!PyArg_ParseTuple(args, "O", &py_root)) {
+        return NULL;
+    }
+    if (!(root = PyRadix_AsRadixNode(py_root))) {
+        return NULL;
+    }
+    visualize(root, 0);
+    Py_RETURN_NONE;
+}
+
 /* Module method table */
 static PyMethodDef RadixMethods[] = {
     {"create", py_create, METH_VARARGS, "Create Radix Tree"},
     {"insert", py_insert, METH_VARARGS, "Insert word into Radix Tree"},
     {"isPartOf", py_isPartOf, METH_VARARGS, "Check if part of text exists in Radix Tree"},
     {"getMemoryUsage", py_getMemoryUsage, METH_VARARGS, "Get memory usage of Radix Tree"},
+    {"visualize", py_visualize, METH_VARARGS, "Visualize Radix Tree for Debug"},
     {NULL, NULL, 0, NULL}
 };
 
