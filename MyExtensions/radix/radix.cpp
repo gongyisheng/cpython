@@ -19,9 +19,10 @@ static void insert(RadixNode* root, const std::string &text) {
         RadixNode **curr_children = curr->children;
         // if the current node has no child with `c` as perfix
         if (curr_children[c] == NULL) {
-            curr_children[c] = new RadixNode();
-            curr_children[c]->word = text.substr(i, text.size()-i);
-            curr_children[c]->isEnd = true;
+            RadixNode *nnode = new RadixNode();
+            nnode->word = text.substr(i, text.size()-i);
+            nnode->isEnd = true;
+            curr_children[c] = nnode;
             break;
         }
 
@@ -103,6 +104,18 @@ static int isPartOf(RadixNode* root, const std::string &text){
     return false;
 }
 
+// calc memory usage of radix tree
+static int getMemoryUsage(RadixNode* root) {
+    int size = sizeof(RadixNode);
+    RadixNode **root_children = root->children;
+    for(int i=0;i<128;i++) {
+        if(root_children[i] != NULL) {
+            size += getMemoryUsage(root_children[i]);
+        }
+    }
+    return size;
+}
+
 /* Destructor function for points */
 static void del_RadixNode(PyObject *obj) {
     free(PyCapsule_GetPointer(obj,"RadixNode"));
@@ -157,11 +170,27 @@ static PyObject *py_isPartOf(PyObject *self, PyObject *args) {
     return Py_BuildValue("i", result);
 }
 
+/* Get Memory Usage of Radix Tree */
+static PyObject *py_getMemoryUsage(PyObject *self, PyObject *args) {
+    RadixNode *root;
+    PyObject *py_root;
+    
+    if (!PyArg_ParseTuple(args, "O", &py_root)) {
+        return NULL;
+    }
+    if (!(root = PyRadix_AsRadixNode(py_root))) {
+        return NULL;
+    }
+    int memSize = getMemoryUsage(root);
+    return Py_BuildValue("i", memSize);
+}
+
 /* Module method table */
 static PyMethodDef RadixMethods[] = {
     {"create", py_create, METH_VARARGS, "Create Radix Tree"},
     {"insert", py_insert, METH_VARARGS, "Insert word into Radix Tree"},
     {"isPartOf", py_isPartOf, METH_VARARGS, "Check if part of text exists in Radix Tree"},
+    {"getMemoryUsage", py_getMemoryUsage, METH_VARARGS, "Get memory usage of Radix Tree"},
     {NULL, NULL, 0, NULL}
 };
 
