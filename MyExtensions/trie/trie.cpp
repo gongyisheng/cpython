@@ -52,7 +52,7 @@ static int isPartOf(TrieNode* root, const std::string &text){
 
 // calc memory usage of trie tree
 static int getMemoryUsage(TrieNode* root) {
-    int size = sizeof(TrieNode);
+    int size = sizeof(root) + sizeof(root->isEnd) + sizeof(root->children);
     TrieNode **root_children = root->children;
     for(int i=0;i<128;i++) {
         if(root_children[i] != NULL) {
