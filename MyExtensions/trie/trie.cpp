@@ -9,6 +9,14 @@ typedef struct TrieNode {
     TrieNode *children[128];
 } TrieNode;
 
+// create
+static TrieNode *create(bool _isEnd=false) {
+    TrieNode *node = new TrieNode();
+    node->isEnd = _isEnd;
+    memset(node->children, NULL, 128);
+    return node;
+}
+
 // insert a word to trie tree
 static void insert(TrieNode* root, const std::string &text) {
     TrieNode* curr = root;
@@ -16,7 +24,7 @@ static void insert(TrieNode* root, const std::string &text) {
         int c = (int)text[i];
         TrieNode **curr_children = curr->children;
         if (curr_children[c] == NULL) {
-            curr_children[c] = new TrieNode();
+            curr_children[c] = create();
         }
         curr = curr_children[c];
     }
@@ -75,10 +83,23 @@ static int getMemoryUsage(TrieNode* root) {
     return size;
 }
 
+// free the tree from memory after usage
+static void freeTree(TrieNode* node, bool is_root=true) {
+    for(int i=0;i<128;i++) {
+        if(node->children[i] != NULL) {
+            freeTree(node->children[i], false);
+            node->children[i] = NULL;
+        }
+    }
+    if(!is_root) { // skip root, because root is attached with a python object
+        delete node;
+        node = NULL; // avoid dangling pointer
+    }
+}
 
 /* Destructor function for points */
 static void del_TrieNode(PyObject *obj) {
-    free(PyCapsule_GetPointer(obj,"TrieNode"));
+    free(PyCapsule_GetPointer(obj, "TrieNode"));
 }
 
 /* Utility functions */
@@ -92,9 +113,7 @@ static PyObject *PyTrie_FromTrieNode(TrieNode *node, int must_free) {
 
 /* Create Trie Tree */
 static PyObject *py_create(PyObject *self, PyObject *args) {
-    TrieNode *node = new TrieNode();
-    node->isEnd = false;
-    memset(node->children, NULL, 128);
+    TrieNode *node = create();
     return PyTrie_FromTrieNode(node, 1);
 }
 
@@ -160,6 +179,21 @@ static PyObject *py_visualize(PyObject *self, PyObject *args) {
     Py_RETURN_NONE;
 }
 
+/* Free the Tree from Memory after Usage */
+static PyObject *py_free(PyObject *self, PyObject *args) {
+    TrieNode *root;
+    PyObject *py_root;
+    
+    if (!PyArg_ParseTuple(args, "O", &py_root)) {
+        return NULL;
+    }
+    if (!(root = PyTrie_AsTrieNode(py_root))) {
+        return NULL;
+    }
+    freeTree(root);
+    Py_RETURN_NONE;
+}
+
 /* Module method table */
 static PyMethodDef TrieMethods[] = {
     {"create", py_create, METH_VARARGS, "Create Trie Tree"},
@@ -167,6 +201,7 @@ static PyMethodDef TrieMethods[] = {
     {"isPartOf", py_isPartOf, METH_VARARGS, "Check if part of text exists in Trie Tree"},
     {"getMemoryUsage", py_getMemoryUsage, METH_VARARGS, "Get memory usage of Trie Tree"},
     {"visualize", py_visualize, METH_VARARGS, "Visualize Trie Tree for debug"},
+    {"free", py_free, METH_VARARGS, "Free the Tree from Memory after Usage"},
     {NULL, NULL, 0, NULL}
 };
 
