@@ -47,7 +47,7 @@ radix.getMemoryUsage(tree) # 4228
 radix.free(tree)
 ```
 ### Known issue
-- Only support ASCII character for performance reasons. String with UTF8/UTF16 encoding should be parsed into ASCII before using trie.
+- Only support ASCII character for performance reasons. String with UTF8/UTF16 encoding should be escaped into ASCII before using trie.
 - If you need to continue to reduce the memory usage of trie tree, you can try Radix tree, Burst-trie tree or [HAT-trie tree](https://github.com/Tessil/hat-trie). [Detailed Doc here](https://tessil.github.io/2017/06/22/hat-trie.html)
 
 ### ToDo
