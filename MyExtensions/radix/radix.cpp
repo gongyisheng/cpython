@@ -14,6 +14,7 @@ typedef struct RadixNode {
 } RadixNode;
 
 // swap children between two radix nodes
+// TODO: this func can be improved if node->children is a pointer to array. 
 static void swapChildren(RadixNode *a, RadixNode *b){
     for(int i=0;i<128;i++){
         RadixNode *tmp = a->children[i];
