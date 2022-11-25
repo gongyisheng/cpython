@@ -54,3 +54,4 @@ radix.free(tree)
 - Add cmake, test cases, ci github workflow
 - Add pyi file for c interfaces, write a Trie Module in python
 - Experiment with KMP algorithm to improve performance (but may at a cost of large memory usage)
+- \[optional\]Add radix.delete() to remove a word from radix tree
