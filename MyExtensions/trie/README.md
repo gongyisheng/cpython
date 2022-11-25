@@ -6,7 +6,7 @@ Trie tree is a kind of prefix tree to locate specific keys from within a set
 ### Prerequisite
 - python >= 3.10.0
 - clang >= 14.0.0
-- clone this cpython folk
+- clone this cpython folk  
 `git clone https://github.com/gongyisheng/cpython.git`
 - checkout to target branch  
 `git checkout trie-extension`
