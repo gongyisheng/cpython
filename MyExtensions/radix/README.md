@@ -36,6 +36,9 @@ radix.visualize(tree)
 radix.isPartOf(tree, "random invalid text") # 0
 radix.isPartOf(tree, "random text foo random text") # 1
 
+# get memory usage of the tree
+radix.getMemoryUsage(tree) # 4228
+
 # free the tree from memory after usage
 radix.free(tree)
 ```
