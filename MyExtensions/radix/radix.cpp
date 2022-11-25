@@ -142,6 +142,17 @@ static int getMemoryUsage(RadixNode* root) {
     return size;
 }
 
+// free the tree from memory after usage
+static void free(RadixNode* node) {
+    RadixNode **node_children = node->children;
+    for(int i=0;i<128;i++) {
+        if(node_children[i] != NULL) {
+            free(node_children[i]);
+        }
+    }
+    delete node;
+}
+
 /* Destructor function for points */
 static void del_RadixNode(PyObject *obj) {
     free(PyCapsule_GetPointer(obj,"RadixNode"));
@@ -226,6 +237,21 @@ static PyObject *py_visualize(PyObject *self, PyObject *args) {
     Py_RETURN_NONE;
 }
 
+/* Free the Tree from Memory after Usage */
+static PyObject *py_free(PyObject *self, PyObject *args) {
+    RadixNode *root;
+    PyObject *py_root;
+    
+    if (!PyArg_ParseTuple(args, "O", &py_root)) {
+        return NULL;
+    }
+    if (!(root = PyRadix_AsRadixNode(py_root))) {
+        return NULL;
+    }
+    free(root);
+    Py_RETURN_NONE;
+}
+
 /* Module method table */
 static PyMethodDef RadixMethods[] = {
     {"create", py_create, METH_VARARGS, "Create Radix Tree"},
@@ -233,6 +259,7 @@ static PyMethodDef RadixMethods[] = {
     {"isPartOf", py_isPartOf, METH_VARARGS, "Check if part of text exists in Radix Tree"},
     {"getMemoryUsage", py_getMemoryUsage, METH_VARARGS, "Get memory usage of Radix Tree"},
     {"visualize", py_visualize, METH_VARARGS, "Visualize Radix Tree for Debug"},
+    {"free", py_free, METH_VARARGS, "Free the Tree from Memory after Usage"},
     {NULL, NULL, 0, NULL}
 };
 
