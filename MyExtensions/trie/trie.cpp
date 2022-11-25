@@ -18,7 +18,7 @@ static TrieNode *create(bool _isEnd=false) {
 }
 
 // insert a word to trie tree
-static void insert(TrieNode* root, const std::string &text) {
+static void insert(TrieNode *root, const std::string &text) {
     TrieNode* curr = root;
     for (int i=0;i<text.size();i++){
         int c = (int)text[i];
@@ -31,8 +31,22 @@ static void insert(TrieNode* root, const std::string &text) {
     curr->isEnd = true;
 }
 
+// find whether the full text is in trie tree
+static int matchFull(TrieNode *root, const std::string &text) {
+    TrieNode *curr = root;
+    for (int i=0;i<text.size();i++){
+        int c = (int)text[i];
+        TrieNode **curr_children = curr->children;
+        if (curr_children[c] == NULL) {
+            return 0;
+        }
+        curr = curr_children[c];
+    }
+    return curr->isEnd;
+}
+
 // find whether any substring in text is in trie tree
-static int isPartOf(TrieNode* root, const std::string &text){
+static int matchSub(TrieNode *root, const std::string &text){
     std::queue<TrieNode*> q;
     auto root_children = root->children;
     for (int i=0;i<text.size();i++) {
@@ -59,7 +73,7 @@ static int isPartOf(TrieNode* root, const std::string &text){
 }
 
 // visualize
-static void visualize(TrieNode* node, int level=0, char c='/') {
+static void visualize(TrieNode *node, int level=0, char c='/') {
     for(int i=0;i<level*4;i++) {
         std::cout << " ";
     }
@@ -72,7 +86,7 @@ static void visualize(TrieNode* node, int level=0, char c='/') {
 }
 
 // calc memory usage of trie tree
-static int getMemoryUsage(TrieNode* root) {
+static int getMemoryUsage(TrieNode *root) {
     int size = sizeof(root) + sizeof(root->isEnd) + sizeof(root->children);
     TrieNode **root_children = root->children;
     for(int i=0;i<128;i++) {
@@ -84,7 +98,7 @@ static int getMemoryUsage(TrieNode* root) {
 }
 
 // free the tree from memory after usage
-static void freeTree(TrieNode* node, bool is_root=true) {
+static void freeTree(TrieNode *node, bool is_root=true) {
     for(int i=0;i<128;i++) {
         if(node->children[i] != NULL) {
             freeTree(node->children[i], false);
@@ -97,6 +111,7 @@ static void freeTree(TrieNode* node, bool is_root=true) {
     }
 }
 
+/* Python Wrapper Functions*/
 /* Destructor function for points */
 static void del_TrieNode(PyObject *obj) {
     freeTree((TrieNode*)PyCapsule_GetPointer(obj, "TrieNode"));
@@ -134,8 +149,8 @@ static PyObject *py_insert(PyObject *self, PyObject *args) {
     Py_RETURN_NONE;
 }
 
-/* Check if part of text exists in Trie Tree */
-static PyObject *py_isPartOf(PyObject *self, PyObject *args) {
+/* Check whether full text exists in Trie Tree */
+static PyObject *py_matchFull(PyObject *self, PyObject *args) {
     TrieNode *root;
     PyObject *py_root;
     const char *text;
@@ -146,7 +161,23 @@ static PyObject *py_isPartOf(PyObject *self, PyObject *args) {
     if (!(root = PyTrie_AsTrieNode(py_root))) {
         return NULL;
     }
-    int result = isPartOf(root, text);
+    int result = matchFull(root, text);
+    return Py_BuildValue("i", result);
+}
+
+/* Check whether any substring of text exists in Trie Tree */
+static PyObject *py_matchSub(PyObject *self, PyObject *args) {
+    TrieNode *root;
+    PyObject *py_root;
+    const char *text;
+    
+    if (!PyArg_ParseTuple(args, "Os", &py_root, &text)) {
+        return NULL;
+    }
+    if (!(root = PyTrie_AsTrieNode(py_root))) {
+        return NULL;
+    }
+    int result = matchSub(root, text);
     return Py_BuildValue("i", result);
 }
 
@@ -199,7 +230,8 @@ static PyObject *py_free(PyObject *self, PyObject *args) {
 static PyMethodDef TrieMethods[] = {
     {"create", py_create, METH_VARARGS, "Create Trie Tree"},
     {"insert", py_insert, METH_VARARGS, "Insert word into Trie Tree"},
-    {"isPartOf", py_isPartOf, METH_VARARGS, "Check if part of text exists in Trie Tree"},
+    {"matchFull", py_matchFull, METH_VARARGS, "Check whether full text exists in Trie Tree"},
+    {"matchSub", py_matchSub, METH_VARARGS, "Check whether any substring of text exists in Trie Tree"},
     {"getMemoryUsage", py_getMemoryUsage, METH_VARARGS, "Get memory usage of Trie Tree"},
     {"visualize", py_visualize, METH_VARARGS, "Visualize Trie Tree for debug"},
     {"free", py_free, METH_VARARGS, "Free the Tree from Memory after Usage"},

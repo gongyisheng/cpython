@@ -38,9 +38,13 @@ trie.visualize(tree)
 #                     Node [character=a,isEnd=0]
 #                         Node [character=r,isEnd=1]
 
+# find if the full given text can be found in trie tree  
+trie.matchFull(tree, "foooooooo") # 0
+trie.matchFull(tree, "foo") # 1
+
 # find if a given text contains any substring that can be found in trie tree  
-trie.isPartOf(tree, "random invalid text") # 0
-trie.isPartOf(tree, "random text foo random text") # 1
+trie.matchSub(tree, "random invalid text") # 0
+trie.matchSub(tree, "random text foo random text") # 1
 
 # get memory usage of tree
 trie.getMemoryUsage(tree) # 10330
