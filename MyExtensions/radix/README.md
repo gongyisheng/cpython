@@ -23,10 +23,10 @@ radix.insert(tree, "foobar")
 
 # visualize tree
 radix.visualize(tree)
-# Node [word=,isEnd=0]
-#     Node [word=bar,isEnd=1]
-#     Node [word=foo,isEnd=1]
-#         Node [word=bar,isEnd=1]
+# Node [address=0x13383e200, word=, isEnd=0]
+#     Node [address=0x134009c00, word=bar, isEnd=1]
+#     Node [address=0x12300a000, word=foo, isEnd=1]
+#         Node [address=0x113808200, word=bar, isEnd=1]
 
 # find if a given text contains any substring that can be found in radix tree  
 radix.isPartOf(tree, "randominvalidtext") # 0

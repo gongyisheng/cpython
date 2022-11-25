@@ -122,7 +122,7 @@ static void visualize(RadixNode* node, int level=0) {
     for(int i=0;i<level*4;i++) {
         std::cout << " ";
     }
-    std::cout << "Node [word=" << node->word << ",isEnd=" << node->isEnd << "]\n";
+    std::cout << "Node [address=" << node << ", word=" << node->word << ", isEnd=" << node->isEnd << "]\n";
     for(int i=0;i<128;i++) {
         if(node->children[i] != NULL) {
             visualize(node->children[i], level+1);
