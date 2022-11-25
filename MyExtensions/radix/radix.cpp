@@ -4,7 +4,8 @@
 #include <iostream>
 
 // Radix node is a kind of compressed Trie node
-// Visualization: https://www.cs.usfca.edu/~galles/visualization/RadixTree.html
+// Radix tree wiki: https://en.wikipedia.org/wiki/Radix_tree
+// Visualization simulator: https://www.cs.usfca.edu/~galles/visualization/RadixTree.html
 
 // Radix node struct
 typedef struct RadixNode {

@@ -1,4 +1,8 @@
 # Radix Tree Python Extension
+### Background
+Radix tree is a kind of compressed trie tree providing same performance as trie tree but much less memory usage  
+[Radix tree wiki](https://en.wikipedia.org/wiki/Radix_tree)  
+[Visualization simulator](https://www.cs.usfca.edu/~galles/visualization/RadixTree.html)
 ### Prerequisite
 - python >= 3.10.0
 - clang >= 14.0.0
