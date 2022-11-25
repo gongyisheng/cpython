@@ -147,18 +147,22 @@ static int getMemoryUsage(RadixNode* node) {
 }
 
 // free the tree from memory after usage
-static void free(RadixNode* node) {
+static void freeTree(RadixNode* node, bool is_root=true) {
     for(int i=0;i<128;i++) {
         if(node->children[i] != NULL) {
-            free(node->children[i]);
+            freeTree(node->children[i], false);
+            node->children[i] = NULL;
         }
     }
-    delete node;
+    if(!is_root) { // skip root, because root is attached with a python object
+        delete node;
+        node = NULL; // avoid dangling pointer
+    }
 }
 
 /* Destructor function for points */
 static void del_RadixNode(PyObject *obj) {
-    free(PyCapsule_GetPointer(obj,"RadixNode"));
+    free(PyCapsule_GetPointer(obj, "RadixNode"));
 }
 
 /* Utility functions */
@@ -249,7 +253,7 @@ static PyObject *py_free(PyObject *self, PyObject *args) {
     if (!(root = PyRadix_AsRadixNode(py_root))) {
         return NULL;
     }
-    free(root);
+    freeTree(root);
     Py_RETURN_NONE;
 }
 
