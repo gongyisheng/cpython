@@ -99,6 +99,7 @@ static void freeTree(TrieNode* node, bool is_root=true) {
 
 /* Destructor function for points */
 static void del_TrieNode(PyObject *obj) {
+    freeTree((TrieNode*)PyCapsule_GetPointer(obj, "TrieNode"));
     free(PyCapsule_GetPointer(obj, "TrieNode"));
 }
 

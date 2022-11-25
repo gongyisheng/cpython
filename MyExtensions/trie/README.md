@@ -45,7 +45,7 @@ trie.isPartOf(tree, "random text foo random text") # 1
 # get memory usage of tree
 trie.getMemoryUsage(tree) # 10330
 
-# free the tree from memory after usage
+# (optional) free the tree from memory after usage
 trie.free(tree)
 ```
 ### Known issue
