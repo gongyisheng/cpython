@@ -265,10 +265,10 @@ static PyMethodDef RadixMethods[] = {
 
 /* Module definition structure */
 static struct PyModuleDef radixmodule = {
-    PyModuleDef_HEAD_INIT,  /* m_base */
+    PyModuleDef_HEAD_INIT,   /* m_base */
     "radix",                 /* name of module */
     "Radix Tree",            /* module documentation, may be NULL */
-    -1,                     /* size of per-interpreter state or -1 */
+    -1,                      /* size of per-interpreter state or -1 */
     RadixMethods             /* method table */
 };
 

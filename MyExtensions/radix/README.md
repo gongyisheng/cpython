@@ -29,9 +29,11 @@ radix.visualize(tree)
 #         Node [address=0x113808200, word=bar, isEnd=1]
 
 # find if a given text contains any substring that can be found in radix tree  
-radix.isPartOf(tree, "randominvalidtext") # 0
-radix.isPartOf(tree, "randomtextfoorandomtext") # 1
+radix.isPartOf(tree, "random invalid text") # 0
+radix.isPartOf(tree, "random text foo random text") # 1
 
 # free the tree from memory after usage
 radix.free(tree)
 ```
+### Known issue
+- Only support ASCII character for performance reasons. String with UTF8/UTF16 encoding should be parsed into ASCII before using radix.
