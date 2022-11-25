@@ -135,12 +135,12 @@ static void visualize(RadixNode* node, int level=0) {
 }
 
 // calc memory usage of radix tree
-static int getMemoryUsage(RadixNode* root) {
-    int size = sizeof(root) + sizeof(root->word) + sizeof(root->isEnd) + sizeof(root->children);
-    RadixNode **root_children = root->children;
+static int getMemoryUsage(RadixNode* node) {
+    int size = sizeof(node) + sizeof(node->word) + sizeof(node->isEnd) + sizeof(node->children);
+    RadixNode **node_children = node->children;
     for(int i=0;i<128;i++) {
-        if(root_children[i] != NULL) {
-            size += getMemoryUsage(root_children[i]);
+        if(node_children[i] != NULL) {
+            size += getMemoryUsage(node_children[i]);
         }
     }
     return size;
