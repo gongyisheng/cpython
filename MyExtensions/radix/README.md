@@ -23,7 +23,7 @@ radix.insert(tree, "foobar")
 
 # visualize tree
 radix.visualize(tree)
-# Node [address=0x13383e200, word=, isEnd=0]
+# Node [address=0x13383e200, word=<root>, isEnd=0]
 #     Node [address=0x134009c00, word=bar, isEnd=1]
 #     Node [address=0x12300a000, word=foo, isEnd=1]
 #         Node [address=0x113808200, word=bar, isEnd=1]

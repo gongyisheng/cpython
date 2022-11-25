@@ -15,12 +15,21 @@ typedef struct RadixNode {
 
 // swap children between two radix nodes
 // TODO: this func can be improved if node->children is a pointer to array. 
-static void swapChildren(RadixNode *a, RadixNode *b){
+static void swapChildren(RadixNode *a, RadixNode *b) {
     for(int i=0;i<128;i++){
         RadixNode *tmp = a->children[i];
         a->children[i] = b->children[i];
         b->children[i] = tmp;
     }
+}
+
+// create a dynamic radix node, should be free from memory after usage
+static RadixNode *create(bool _isEnd=false, std::string _word="") {
+    RadixNode *node = new RadixNode();
+    node->isEnd = _isEnd;
+    node->word = _word;
+    memset(node->children, NULL, 128);
+    return node;
 }
 
 // insert a word to radix tree
@@ -32,9 +41,7 @@ static void insert(RadixNode* root, const std::string &text) {
         RadixNode **curr_children = curr->children;
         // if the current node has no child with `c` as perfix
         if (curr_children[c] == NULL) {
-            RadixNode *nnode = new RadixNode();
-            nnode->word = text.substr(i, text.size()-i);
-            nnode->isEnd = true;
+            RadixNode *nnode = create(true, text.substr(i, text.size()-i));
             curr_children[c] = nnode;
             break;
         }
@@ -54,10 +61,8 @@ static void insert(RadixNode* root, const std::string &text) {
         }
         else { // if not reach the end of the existing word
             // create a new node to be appended to the existing node (left node)
-            RadixNode *lnode = new RadixNode();
             RadixNode *pnode = curr_children[c];
-            lnode->word = curr_word.substr(j, curr_word.size()-j);
-            lnode->isEnd = curr_children[c]->isEnd;
+            RadixNode *lnode = create(pnode->isEnd, curr_word.substr(j, curr_word.size()-j));
             swapChildren(lnode, pnode);
             // update the existing node (parent node)
             pnode->word = curr_word.substr(0, j);
@@ -68,9 +73,7 @@ static void insert(RadixNode* root, const std::string &text) {
                 curr_children[c]->isEnd = true;
             } 
             else { // if the new word is longer than the existing word, create a new node (right node)
-                RadixNode *rnode = new RadixNode();
-                rnode->word = text.substr(i);
-                rnode->isEnd = true;
+                RadixNode *rnode = create(true, text.substr(i));
                 curr_children[c]->children[(int)rnode->word[0]] = rnode;
             }
             break;
@@ -144,10 +147,9 @@ static int getMemoryUsage(RadixNode* root) {
 
 // free the tree from memory after usage
 static void free(RadixNode* node) {
-    RadixNode **node_children = node->children;
     for(int i=0;i<128;i++) {
-        if(node_children[i] != NULL) {
-            free(node_children[i]);
+        if(node->children[i] != NULL) {
+            free(node->children[i]);
         }
     }
     delete node;
@@ -169,9 +171,7 @@ static PyObject *PyRadix_FromRadixNode(RadixNode *node, int must_free) {
 
 /* Create Radix Tree */
 static PyObject *py_create(PyObject *self, PyObject *args) {
-    RadixNode *node = new RadixNode();
-    node->isEnd = false;
-    memset(node->children, NULL, 128);
+    RadixNode *node = create(false, "<root>");
     return PyRadix_FromRadixNode(node, 1);
 }
 
