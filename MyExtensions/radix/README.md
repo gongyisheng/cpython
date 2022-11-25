@@ -32,9 +32,13 @@ radix.visualize(tree)
 #     Node [address=0x12300a000, word=foo, isEnd=1]
 #         Node [address=0x113808200, word=bar, isEnd=1]
 
-# find if a given text contains any substring that can be found in radix tree  
-radix.isPartOf(tree, "random invalid text") # 0
-radix.isPartOf(tree, "random text foo random text") # 1
+# find whether the full given text can be found in radix tree  
+radix.matchFull(tree, "foooooooo") # 0
+radix.matchFull(tree, "foo") # 1
+
+# find whether any substring of the given text can be found in radix tree  
+radix.matchSub(tree, "random invalid text") # 0
+radix.matchSub(tree, "random text foo random text") # 1
 
 # get memory usage of the tree
 radix.getMemoryUsage(tree) # 4228

@@ -34,7 +34,7 @@ static RadixNode *create(bool _isEnd=false, std::string _word="") {
 }
 
 // insert a word to radix tree
-static void insert(RadixNode* root, const std::string &text) {
+static void insert(RadixNode *root, const std::string &text) {
     RadixNode* curr = root;
     int i = 0;
     while(i<text.size()) {
@@ -82,8 +82,34 @@ static void insert(RadixNode* root, const std::string &text) {
     }
 }
 
-// find whether any substring in text is in radix tree
-static int isPartOf(RadixNode* root, const std::string &text){
+// find whether the full given text is in radix tree
+static int matchFull(RadixNode *root, const std::string &text){
+    RadixNode *curr = root;
+    int i = 0;
+    while(i<text.size()){
+        int c = (int)text[i];
+        RadixNode **curr_children = curr->children;
+        if(curr_children[c] == NULL){
+            return 0;
+        }
+        std::string curr_word = curr_children[c]->word;
+        int j = 0;
+        while(j<curr_word.size() && i<text.size() && curr_word[j]==text[i]){
+            j++;
+            i++;
+        }
+        if(j==curr_word.size()){
+            curr = curr_children[c];
+        }
+        else{
+            return 0;
+        }
+    }
+    return curr->isEnd;
+}
+
+// find whether any substring of the given text is in radix tree
+static int matchSub(RadixNode *root, const std::string &text){
     std::queue<std::pair<RadixNode*, int> > q;
     RadixNode **root_children = root->children;
     for (int i=0;i<text.size();i++) {
@@ -122,7 +148,7 @@ static int isPartOf(RadixNode* root, const std::string &text){
 }
 
 // visualize
-static void visualize(RadixNode* node, int level=0) {
+static void visualize(RadixNode *node, int level=0) {
     for(int i=0;i<level*4;i++) {
         std::cout << " ";
     }
@@ -135,7 +161,7 @@ static void visualize(RadixNode* node, int level=0) {
 }
 
 // calc memory usage of radix tree
-static int getMemoryUsage(RadixNode* node) {
+static int getMemoryUsage(RadixNode *node) {
     int size = sizeof(node) + sizeof(node->word) + sizeof(node->isEnd) + sizeof(node->children);
     RadixNode **node_children = node->children;
     for(int i=0;i<128;i++) {
@@ -147,7 +173,7 @@ static int getMemoryUsage(RadixNode* node) {
 }
 
 // free the tree from memory after usage
-static void freeTree(RadixNode* node, bool is_root=true) {
+static void freeTree(RadixNode *node, bool is_root=true) {
     for(int i=0;i<128;i++) {
         if(node->children[i] != NULL) {
             freeTree(node->children[i], false);
@@ -162,6 +188,7 @@ static void freeTree(RadixNode* node, bool is_root=true) {
 
 /* Destructor function for points */
 static void del_RadixNode(PyObject *obj) {
+    freeTree((RadixNode*)PyCapsule_GetPointer(obj, "RadixNode"));
     free(PyCapsule_GetPointer(obj, "RadixNode"));
 }
 
@@ -196,8 +223,8 @@ static PyObject *py_insert(PyObject *self, PyObject *args) {
     Py_RETURN_NONE;
 }
 
-/* Check if part of text exists in Radix Tree */
-static PyObject *py_isPartOf(PyObject *self, PyObject *args) {
+/* Check whether the full given text exists in Radix Tree */
+static PyObject *py_matchFull(PyObject *self, PyObject *args) {
     RadixNode *root;
     PyObject *py_root;
     const char *text;
@@ -208,7 +235,23 @@ static PyObject *py_isPartOf(PyObject *self, PyObject *args) {
     if (!(root = PyRadix_AsRadixNode(py_root))) {
         return NULL;
     }
-    int result = isPartOf(root, text);
+    int result = matchFull(root, text);
+    return Py_BuildValue("i", result);
+}
+
+/* Check whether any substring of the given text exists in Radix Tree */
+static PyObject *py_matchSub(PyObject *self, PyObject *args) {
+    RadixNode *root;
+    PyObject *py_root;
+    const char *text;
+    
+    if (!PyArg_ParseTuple(args, "Os", &py_root, &text)) {
+        return NULL;
+    }
+    if (!(root = PyRadix_AsRadixNode(py_root))) {
+        return NULL;
+    }
+    int result = matchSub(root, text);
     return Py_BuildValue("i", result);
 }
 
@@ -261,7 +304,8 @@ static PyObject *py_free(PyObject *self, PyObject *args) {
 static PyMethodDef RadixMethods[] = {
     {"create", py_create, METH_VARARGS, "Create Radix Tree"},
     {"insert", py_insert, METH_VARARGS, "Insert word into Radix Tree"},
-    {"isPartOf", py_isPartOf, METH_VARARGS, "Check if part of text exists in Radix Tree"},
+    {"matchFull", py_matchFull, METH_VARARGS, "Check whether the full given text exists in Radix Tree"},
+    {"matchSub", py_matchSub, METH_VARARGS, "Check whether any substring of given text exists in Radix Tree"},
     {"getMemoryUsage", py_getMemoryUsage, METH_VARARGS, "Get memory usage of Radix Tree"},
     {"visualize", py_visualize, METH_VARARGS, "Visualize Radix Tree for Debug"},
     {"free", py_free, METH_VARARGS, "Free the Tree from Memory after Usage"},
