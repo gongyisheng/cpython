@@ -1,7 +1,7 @@
 #include <Python.h>
 #include <string>
 
-
+// get next array
 static int *getNext(const std::string &pattern) {
     int i = 0, j = -1;
     int *next = new int[pattern.size() + 1];
@@ -18,6 +18,7 @@ static int *getNext(const std::string &pattern) {
     return next;
 }
 
+// match text by pattern
 static int match(const std::string &text, const std::string &pattern) {
     int *next = getNext(pattern);
     int i = 0, j = 0;
