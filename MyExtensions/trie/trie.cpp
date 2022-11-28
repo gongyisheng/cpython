@@ -5,6 +5,7 @@
 
 // Trie node struct
 typedef struct TrieNode {
+    int max_depth;
     bool isEnd;
     TrieNode *children[128];
 } TrieNode;
@@ -12,6 +13,7 @@ typedef struct TrieNode {
 // create
 static TrieNode *create(bool _isEnd=false) {
     TrieNode *node = new TrieNode();
+    node->max_depth = 0;
     node->isEnd = _isEnd;
     memset(node->children, NULL, 128);
     return node;
@@ -19,6 +21,7 @@ static TrieNode *create(bool _isEnd=false) {
 
 // insert a word to trie tree
 static void insert(TrieNode *root, const std::string &text) {
+    root->max_depth = std::max(root->max_depth, (int)text.size());
     TrieNode* curr = root;
     for (int i=0;i<text.size();i++){
         int c = (int)text[i];
@@ -47,27 +50,31 @@ static int matchFull(TrieNode *root, const std::string &text) {
 
 // find whether any substring in text is in trie tree
 static int matchSub(TrieNode *root, const std::string &text){
-    std::queue<TrieNode*> q;
+    TrieNode *q[root->max_depth];
+    int q_tail = 0;
     auto root_children = root->children;
     for (int i=0;i<text.size();i++) {
         char c = (int)text[i];
-        if(q.size()!=0){
-            int size = q.size();
+        int new_tail = 0;
+        if(q_tail!=0){
+            int size = q_tail;
             for(int j=0;j<size;j++){
-                TrieNode *node = q.front();
+                TrieNode *node = q[j];
                 TrieNode **node_children = node->children;
-                q.pop();
                 if(node_children[c] != NULL){
                     if(node_children[c]->isEnd){
                         return 1;
                     }
-                    q.push(node_children[c]);
+                    q[new_tail] = node_children[c];
+                    new_tail++;
                 }
             }
         }
         if(root_children[c] != NULL){
-            q.push(root_children[c]);
+            q[new_tail] = root_children[c];
+            new_tail++;
         }
+        q_tail = new_tail;
     }
     return 0;
 }
