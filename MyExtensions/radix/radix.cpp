@@ -11,7 +11,7 @@
 // Radix node struct
 typedef struct RadixNode {
     bool isEnd;
-    int max_depth;
+    int height;
     std::string word;
     RadixNode *children[128];
 } RadixNode;
@@ -31,14 +31,14 @@ static RadixNode *create(bool _isEnd=false, std::string _word="") {
     RadixNode *node = new RadixNode();
     node->isEnd = _isEnd;
     node->word = _word;
-    node->max_depth = 0;
+    node->height = 0;
     memset(node->children, NULL, 128);
     return node;
 }
 
 // insert a word to radix tree
 static void insert(RadixNode *root, const std::string &text) {
-    root->max_depth = std::max(root->max_depth, (int)text.size());
+    root->height = std::max(root->height, (int)text.size());
     RadixNode* curr = root;
     int i = 0;
     while(i<text.size()) {
@@ -114,8 +114,8 @@ static int matchFull(RadixNode *root, const std::string &text){
 
 // find whether any substring of the given text is in radix tree
 static int matchSub(RadixNode *root, const std::string &text){
-    RadixNode *node_queue[root->max_depth+1];
-    int index_queue[root->max_depth+1];
+    RadixNode *node_queue[root->height];
+    int index_queue[root->height];
     int q_tail = 0;
     RadixNode **root_children = root->children;
     for (int i=0;i<text.size();i++) {
