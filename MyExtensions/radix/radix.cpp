@@ -6,6 +6,7 @@
 // Radix tree wiki: https://en.wikipedia.org/wiki/Radix_tree
 // Visualization simulator: https://www.cs.usfca.edu/~galles/visualization/RadixTree.html
 
+//debug mode 
 //#define DEBUG_MODE
 
 // Radix node struct
