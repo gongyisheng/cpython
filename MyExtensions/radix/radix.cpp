@@ -117,29 +117,28 @@ static int matchSub(RadixNode *root, const std::string &text){
     int q_tail = 0;
     RadixNode **root_children = root->children;
     for (int i=0;i<text.size();i++) {
-        char c = (int)text[i];
+        int c = (int)text[i];
         int new_tail = 0;
         for(int j=0;j<q_tail;j++){
             RadixNode *node = q[j].first;
             RadixNode **node_children = node->children;
             int index = q[j].second;
-            if(node->word[index]==text[i]) {
-                // if cursor is at the end of the word
-                if(index==node->word.size()-1) {
-                    // reach the end
-                    if(node->isEnd) {
-                        return 1;
-                    }
-                    // has next node
-                    else if(node_children[c] != NULL) {
-                        q[new_tail] = std::make_pair(node_children[c], 0);
-                        new_tail++;
-                    }
+            std::cout << node->word[index] << text[i] << index << std::endl;
+            // if cursor is at the end of the word
+            if(index==node->word.size()) {
+                // reach the end
+                if(node->isEnd) {
+                    return 1;
                 }
-                else {
-                    q[new_tail] = std::make_pair(node, index+1);
+                // has next node
+                else if(node_children[c] != NULL) {
+                    q[new_tail] = std::make_pair(node_children[c], 1);
                     new_tail++;
                 }
+            }
+            if(node->word[index]==text[i]) {
+                q[new_tail] = std::make_pair(node, index+1);
+                new_tail++;
             }
         }
         if(root_children[c] != NULL){
@@ -147,6 +146,18 @@ static int matchSub(RadixNode *root, const std::string &text){
             new_tail++;
         }
         q_tail = new_tail;
+        std::cout << "char: " << text[i] << ", q_tail: " << q_tail << " [";
+        for(int j=0;j<q_tail;j++){
+            std::cout << "(" <<q[j].first->word << "," << q[j].second << ") ";
+        }
+        std::cout << "]" << std::endl;
+    }
+    
+    // handle cases that the substring ends with last character matches
+    for(int i=0;i<q_tail;i++){
+        if(q[i].first->isEnd) {
+            return 1;
+        }
     }
     return 0;
 }
