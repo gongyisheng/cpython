@@ -9,6 +9,7 @@
 
 // Radix node struct
 typedef struct RadixNode {
+    int max_depth;
     bool isEnd;
     std::string word;
     RadixNode *children[128];
@@ -29,12 +30,14 @@ static RadixNode *create(bool _isEnd=false, std::string _word="") {
     RadixNode *node = new RadixNode();
     node->isEnd = _isEnd;
     node->word = _word;
+    node->max_depth = 0;
     memset(node->children, NULL, 128);
     return node;
 }
 
 // insert a word to radix tree
 static void insert(RadixNode *root, const std::string &text) {
+    root->max_depth = std::max(root->max_depth, (int)text.size());
     RadixNode* curr = root;
     int i = 0;
     while(i<text.size()) {
@@ -110,39 +113,40 @@ static int matchFull(RadixNode *root, const std::string &text){
 
 // find whether any substring of the given text is in radix tree
 static int matchSub(RadixNode *root, const std::string &text){
-    std::queue<std::pair<RadixNode*, int> > q;
+    std::pair<RadixNode*, int> q[root->max_depth+1];
+    int q_tail = 0;
     RadixNode **root_children = root->children;
     for (int i=0;i<text.size();i++) {
         char c = (int)text[i];
-        if(q.size()!=0){
-            int size = q.size();
-            for(int j=0;j<size;j++){
-                std::pair<RadixNode*, int> p = q.front();
-                RadixNode *node = p.first;
-                RadixNode **node_children = node->children;
-                int index = p.second;
-                q.pop();
-                if(node->word[index]==text[i]) {
-                    // if cursor is at the end of the word
-                    if(index==node->word.size()-1) {
-                        // reach the end
-                        if(node->isEnd) {
-                            return true;
-                        }
-                        // has next node
-                        else if(node_children[c] != NULL) {
-                            q.push(std::make_pair(node_children[c], 0));
-                        }
+        int new_tail = 0;
+        for(int j=0;j<q_tail;j++){
+            RadixNode *node = q[j].first;
+            RadixNode **node_children = node->children;
+            int index = q[j].second;
+            if(node->word[index]==text[i]) {
+                // if cursor is at the end of the word
+                if(index==node->word.size()-1) {
+                    // reach the end
+                    if(node->isEnd) {
+                        return true;
                     }
-                    else {
-                        q.push(std::make_pair(node, index+1));
+                    // has next node
+                    else if(node_children[c] != NULL) {
+                        q[new_tail] = std::make_pair(node_children[c], 0);
+                        new_tail++;
                     }
+                }
+                else {
+                    q[new_tail] = std::make_pair(node, index+1);
+                    new_tail++;
                 }
             }
         }
         if(root_children[c] != NULL){
-            q.push(std::make_pair(root_children[c], 1));
+            q[new_tail] = std::make_pair(root_children[c], 1);
+            new_tail++;
         }
+        q_tail = new_tail;
     }
     return false;
 }
