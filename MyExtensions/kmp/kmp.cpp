@@ -85,7 +85,7 @@ static PyObject *Pykmp_Fromkmpnext(kmp_next *next, int must_free) {
 static PyObject *py_match(PyObject *self, PyObject *args) {
     const char *text;
     const char *pattern;
-    if (!PyArg_ParseTuple(args, "OO", &text, &pattern)) {
+    if (!PyArg_ParseTuple(args, "ss", &text, &pattern)) {
         return NULL;
     }
     int result = match(text, pattern);
