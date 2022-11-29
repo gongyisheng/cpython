@@ -128,7 +128,7 @@ static int matchSub(RadixNode *root, const std::string &text){
                 if(index==node->word.size()-1) {
                     // reach the end
                     if(node->isEnd) {
-                        return true;
+                        return 1;
                     }
                     // has next node
                     else if(node_children[c] != NULL) {
@@ -148,7 +148,7 @@ static int matchSub(RadixNode *root, const std::string &text){
         }
         q_tail = new_tail;
     }
-    return false;
+    return 0;
 }
 
 // visualize
