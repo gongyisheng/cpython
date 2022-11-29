@@ -7,6 +7,8 @@
 // Radix tree wiki: https://en.wikipedia.org/wiki/Radix_tree
 // Visualization simulator: https://www.cs.usfca.edu/~galles/visualization/RadixTree.html
 
+#define DEBUG_MODE false
+
 // Radix node struct
 typedef struct RadixNode {
     int max_depth;
@@ -123,7 +125,6 @@ static int matchSub(RadixNode *root, const std::string &text){
             RadixNode *node = q[j].first;
             RadixNode **node_children = node->children;
             int index = q[j].second;
-            std::cout << node->word[index] << text[i] << index << std::endl;
             // if cursor is at the end of the word
             if(index==node->word.size()) {
                 // reach the end
@@ -146,13 +147,15 @@ static int matchSub(RadixNode *root, const std::string &text){
             new_tail++;
         }
         q_tail = new_tail;
-        std::cout << "char: " << text[i] << ", q_tail: " << q_tail << " [";
-        for(int j=0;j<q_tail;j++){
-            std::cout << "(" <<q[j].first->word << "," << q[j].second << ") ";
+        if(DEBUG_MODE){
+            std::cout << "char: " << text[i] << ", q_tail: " << q_tail << ", queue:[";
+            for(int j=0;j<q_tail;j++){
+                std::cout << "(" <<q[j].first->word << "," << q[j].second << ") ";
+            }
+            std::cout << "]" << std::endl;
         }
-        std::cout << "]" << std::endl;
     }
-    
+
     // handle cases that the substring ends with last character matches
     for(int i=0;i<q_tail;i++){
         if(q[i].first->isEnd) {
