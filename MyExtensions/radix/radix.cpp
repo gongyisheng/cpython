@@ -1,6 +1,5 @@
 #include <Python.h>
 #include <string>
-#include <queue>
 #include <iostream>
 
 // Radix node is a kind of compressed Trie node
@@ -11,8 +10,8 @@
 
 // Radix node struct
 typedef struct RadixNode {
-    int max_depth;
     bool isEnd;
+    int max_depth;
     std::string word;
     RadixNode *children[128];
 } RadixNode;
