@@ -7,7 +7,7 @@
 // Radix tree wiki: https://en.wikipedia.org/wiki/Radix_tree
 // Visualization simulator: https://www.cs.usfca.edu/~galles/visualization/RadixTree.html
 
-#define DEBUG_MODE false
+//#define DEBUG_MODE
 
 // Radix node struct
 typedef struct RadixNode {
@@ -115,16 +115,17 @@ static int matchFull(RadixNode *root, const std::string &text){
 
 // find whether any substring of the given text is in radix tree
 static int matchSub(RadixNode *root, const std::string &text){
-    std::pair<RadixNode*, int> q[root->max_depth+1];
+    RadixNode *node_queue[root->max_depth+1];
+    int index_queue[root->max_depth+1];
     int q_tail = 0;
     RadixNode **root_children = root->children;
     for (int i=0;i<text.size();i++) {
         int c = (int)text[i];
         int new_tail = 0;
         for(int j=0;j<q_tail;j++){
-            RadixNode *node = q[j].first;
+            RadixNode *node = node_queue[j];
             RadixNode **node_children = node->children;
-            int index = q[j].second;
+            int index = index_queue[j];
             // if cursor is at the end of the word
             if(index==node->word.size()) {
                 // reach the end
@@ -133,32 +134,35 @@ static int matchSub(RadixNode *root, const std::string &text){
                 }
                 // has next node
                 else if(node_children[c] != NULL) {
-                    q[new_tail] = std::make_pair(node_children[c], 1);
+                    node_queue[new_tail] = node_children[c];
+                    index_queue[new_tail] = 1;
                     new_tail++;
                 }
             }
-            if(node->word[index]==text[i]) {
-                q[new_tail] = std::make_pair(node, index+1);
+            else if(node->word[index]==text[i]) {
+                node_queue[new_tail] = node;
+                index_queue[new_tail] = index+1;
                 new_tail++;
             }
         }
         if(root_children[c] != NULL){
-            q[new_tail] = std::make_pair(root_children[c], 1);
+            node_queue[new_tail] = root_children[c];
+            index_queue[new_tail] = 1;
             new_tail++;
         }
         q_tail = new_tail;
-        if(DEBUG_MODE){
-            std::cout << "char: " << text[i] << ", q_tail: " << q_tail << ", queue:[";
-            for(int j=0;j<q_tail;j++){
-                std::cout << "(" <<q[j].first->word << "," << q[j].second << ") ";
-            }
-            std::cout << "]" << std::endl;
+        #ifdef DEBUG_MODE
+        std::cout << "char: " << text[i] << ", q_tail: " << q_tail << ", queue:[";
+        for(int j=0;j<q_tail;j++){
+            std::cout << "(" <<q[j].first->word << "," << q[j].second << ") ";
         }
+        std::cout << "]" << std::endl;
+        #endif
     }
 
     // handle cases that the substring ends with last character matches
     for(int i=0;i<q_tail;i++){
-        if(q[i].first->isEnd) {
+        if(node_queue[i]->isEnd) {
             return 1;
         }
     }
