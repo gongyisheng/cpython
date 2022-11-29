@@ -85,7 +85,7 @@ static PyObject *Pykmp_Fromkmpnext(kmp_next *next, int must_free) {
 static PyObject *py_match(PyObject *self, PyObject *args) {
     const char *text;
     const char *pattern;
-    if (!PyArg_ParseTuple(args, "OO", &text, &pattern)) {
+    if (!PyArg_ParseTuple(args, "ss", &text, &pattern)) {
         return NULL;
     }
     int result = match(text, pattern);
@@ -95,7 +95,7 @@ static PyObject *py_match(PyObject *self, PyObject *args) {
 // get cached next
 static PyObject *py_getNext(PyObject *self, PyObject *args) {
     const char *pattern;
-    if (!PyArg_ParseTuple(args, "O", &pattern)) {
+    if (!PyArg_ParseTuple(args, "s", &pattern)) {
         return NULL;
     }
     kmp_next *next = getNext(pattern);
@@ -108,7 +108,7 @@ static PyObject *py_matchWithNext(PyObject *self, PyObject *args) {
     const char *pattern;
     PyObject *py_next;
     kmp_next *next;
-    if (!PyArg_ParseTuple(args, "OOO", &text, &pattern, &py_next)) {
+    if (!PyArg_ParseTuple(args, "ssO", &text, &pattern, &py_next)) {
         return NULL;
     }
     if (!(next = Pykmp_Askmpnext(py_next))) {
