@@ -55,3 +55,5 @@ radix.free(tree)
 - Add pyi file for c interfaces, write a Trie Module in python
 - Experiment with KMP algorithm to improve performance (but may at a cost of large memory usage)
 - \[optional\]Add radix.delete() to remove a word from radix tree
+- Make `word` char array instead of string to reduce memory usage and improve performance
+- Better queue implementation 
