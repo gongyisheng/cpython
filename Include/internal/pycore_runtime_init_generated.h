@@ -978,6 +978,9 @@ extern "C" {
     INIT_ID(keyfile), \
     INIT_ID(keys), \
     INIT_ID(kind), \
+    INIT_ID(kw), \
+    INIT_ID(kw1), \
+    INIT_ID(kw2), \
     INIT_ID(lambda), \
     INIT_ID(last), \
     INIT_ID(last_node), \
@@ -1040,6 +1043,7 @@ extern "C" {
     INIT_ID(node_offset), \
     INIT_ID(ns), \
     INIT_ID(nstype), \
+    INIT_ID(nt), \
     INIT_ID(null), \
     INIT_ID(number), \
     INIT_ID(obj), \
@@ -1076,6 +1080,9 @@ extern "C" {
     INIT_ID(pid), \
     INIT_ID(policy), \
     INIT_ID(pos), \
+    INIT_ID(pos1), \
+    INIT_ID(pos2), \
+    INIT_ID(posix), \
     INIT_ID(print_file_and_line), \
     INIT_ID(priority), \
     INIT_ID(progress), \
